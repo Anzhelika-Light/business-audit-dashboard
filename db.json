@@ -1,0 +1,9 @@
+{
+    "audits": [
+      { "id": "1", "name": "Financial Audit Q4", "status": "Completed", "risk": "Low", "budget": "$12,000", "details": "Review Q4 2025." },
+      { "id": "2", "name": "IT Security Check", "status": "In Progress", "risk": "High", "budget": "$8,500", "details": "Critical vulnerabilities." },
+      { "id": "3", "name": "Tax Compliance", "status": "Pending", "risk": "Medium", "budget": "$5,000", "details": "Awaiting documents." },
+      { "id": "4", "name": "GDPR Data Audit", "status": "Completed", "risk": "Low", "budget": "$3,200", "details": "Compliance verified." },
+      { "id": "5", "name": "Supply Chain Review", "status": "In Progress", "risk": "High", "budget": "$15,400", "details": "Vendor reliability check." }
+    ]
+  }
