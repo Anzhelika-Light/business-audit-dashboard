@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { auditApi } from "../api/auditApi";
 import type { Audit } from "../types/audit";
 
 interface AuditState {
@@ -15,9 +15,29 @@ const initialState: AuditState = {
 };
 
 export const fetchAudits = createAsyncThunk("audits/fetchAudits", async () => {
-  const response = await axios.get<Audit[]>("http://localhost:3001/audits");
-  return response.data;
+  return await auditApi.getAudits();
 });
+
+export const addAudit = createAsyncThunk(
+  "audits/addAudit",
+  async (newAudit: Omit<Audit, "id">) => {
+    return await auditApi.createAudit(newAudit);
+  }
+);
+
+export const updateAudit = createAsyncThunk(
+  "audits/updateAudit",
+  async (audit: Audit) => {
+    return await auditApi.updateAudit(audit);
+  }
+);
+
+export const removeAudit = createAsyncThunk(
+  "audits/removeAudit",
+  async (id: string | number) => {
+    return await auditApi.deleteAudit(id);
+  }
+);
 
 const auditSlice = createSlice({
   name: "audits",
@@ -32,9 +52,21 @@ const auditSlice = createSlice({
         state.loading = false;
         state.items = action.payload;
       })
-      .addCase(fetchAudits.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Error";
+      .addCase(addAudit.fulfilled, (state, action) => {
+        state.items.push(action.payload);
+      })
+      .addCase(updateAudit.fulfilled, (state, action) => {
+        const index = state.items.findIndex(
+          (item) => item.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+      })
+      .addCase(removeAudit.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          (audit) => audit.id !== action.payload
+        );
       });
   },
 });

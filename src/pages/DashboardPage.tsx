@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Typography,
   Stack,
@@ -5,6 +6,7 @@ import {
   TextField,
   Grid,
   type Theme,
+  Box,
 } from "@mui/material";
 import {
   Download,
@@ -27,17 +29,26 @@ interface DashboardPageProps {
   mode: "light" | "dark";
   theme: Theme;
   onRowClick: (audit: Audit) => void;
+  onEditClick: (audit: Audit) => void;
 }
 
-export const DashboardPage = ({
+export const DashboardPage: React.FC<DashboardPageProps> = ({
   audits,
   isMounted,
   mode,
   theme,
   onRowClick,
-}: DashboardPageProps) => {
+  onEditClick,
+}) => {
   const { search, setSearch, filteredAudits, chartData } =
     useAuditFilters(audits);
+
+  const formattedChartData = chartData.map(
+    (item: { name: string; budget: number }) => ({
+      name: item.name,
+      value: item.budget,
+    })
+  );
 
   const stats = [
     {
@@ -54,7 +65,7 @@ export const DashboardPage = ({
     },
     {
       title: "High Risks",
-      value: audits.filter((a: Audit) => a.risk === "High").length.toString(),
+      value: audits.filter((a) => a.risk === "High").length.toString(),
       icon: <AssignmentLate color="error" />,
       trend: "Active",
     },
@@ -89,29 +100,59 @@ export const DashboardPage = ({
       <StatsCards stats={stats} mode={mode} />
 
       <TextField
-        label="Search"
+        label="Search audits..."
         size="small"
         fullWidth
-        sx={{ mb: 3 }}
+        sx={{ mb: 3, mt: 3 }}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 8 }} sx={{ minWidth: 0 }}>
-          <AuditChart
-            isMounted={isMounted}
-            chartData={chartData}
-            mode={mode}
-            theme={theme}
-          />
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "background.paper",
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: "divider",
+              minWidth: 0,
+            }}
+          >
+            <AuditChart
+              isMounted={isMounted}
+              chartData={formattedChartData}
+              mode={mode}
+              theme={theme}
+            />
+          </Box>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }} sx={{ minWidth: 0 }}>
-          <RiskPieChart audits={filteredAudits} isMounted={isMounted} />
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "background.paper",
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: "divider",
+              height: "100%",
+              minWidth: 0, 
+            }}
+          >
+            <RiskPieChart audits={filteredAudits} isMounted={isMounted} />
+          </Box>
         </Grid>
       </Grid>
 
-      <AuditTable audits={filteredAudits} onRowClick={onRowClick} />
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+        Recent Engagements
+      </Typography>
+      <AuditTable
+        audits={filteredAudits}
+        onRowClick={onRowClick}
+        onEditClick={onEditClick}
+      />
     </>
   );
 };

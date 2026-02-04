@@ -23,6 +23,7 @@ import {
   ThemeProvider,
   CircularProgress,
   Alert,
+  Button,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -30,16 +31,16 @@ import {
   Warning,
   Brightness4,
   Brightness7,
+  Add as AddIcon,
 } from "@mui/icons-material";
-
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAudits } from "./store/auditSlice";
-import type { RootState, AppDispatch } from "./store";
-
+import type { RootState, AppDispatch } from "./store/index";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AuditsPage } from "./pages/AuditsPage";
 import { RisksPage } from "./pages/RisksPage";
 import { AuditDetailsDialog } from "./components/AuditDetailsDialog";
+import { AuditFormDialog } from "./components/AuditFormDialog";
 import type { Audit } from "./types/audit";
 
 const drawerWidth = 240;
@@ -49,6 +50,10 @@ function AppContent() {
     (localStorage.getItem("appMode") as "light" | "dark") || "light"
   );
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [auditToEdit, setAuditToEdit] = useState<Audit | null>(null);
+
+  const [formKey, setFormKey] = useState(0);
 
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -56,21 +61,13 @@ function AppContent() {
     loading,
     error,
   } = useSelector((state: RootState) => state.audits);
-
   const navigate = useNavigate();
   const location = useLocation();
 
   const theme = useMemo(
     () =>
       createTheme({
-        palette: {
-          mode,
-          primary: { main: "#1976d2" },
-          background: {
-            default: mode === "light" ? "#f4f6f8" : "#121212",
-            paper: mode === "light" ? "#ffffff" : "#1e1e1e",
-          },
-        },
+        palette: { mode, primary: { main: "#1976d2" } },
         shape: { borderRadius: 12 },
       }),
     [mode]
@@ -78,17 +75,24 @@ function AppContent() {
 
   useEffect(() => {
     dispatch(fetchAudits());
-  }, [dispatch]);
-
-  useEffect(() => {
     localStorage.setItem("appMode", mode);
-  }, [mode]);
+  }, [mode, dispatch]);
 
-  const menuItems = [
-    { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-    { text: "Audits", icon: <Assessment />, path: "/audits" },
-    { text: "Risk Reports", icon: <Warning />, path: "/risks" },
-  ];
+  const handleOpenCreate = () => {
+    setAuditToEdit(null);
+    setFormKey((prev) => prev + 1);
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (audit: Audit) => {
+    setAuditToEdit(audit);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setAuditToEdit(null);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -100,18 +104,27 @@ function AppContent() {
         }}
       >
         <CssBaseline />
-
         <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
           <Toolbar sx={{ justifyContent: "space-between" }}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Business Audit Pro
-            </Typography>
-            <IconButton
-              onClick={() => setMode((p) => (p === "light" ? "dark" : "light"))}
-              color="inherit"
-            >
-              {mode === "dark" ? <Brightness7 /> : <Brightness4 />}
-            </IconButton>
+            <Typography variant="h6">AUDIT.CORE</Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<AddIcon />}
+                onClick={handleOpenCreate}
+              >
+                New Audit
+              </Button>
+              <IconButton
+                onClick={() =>
+                  setMode((m) => (m === "light" ? "dark" : "light"))
+                }
+                color="inherit"
+              >
+                {mode === "dark" ? <Brightness7 /> : <Brightness4 />}
+              </IconButton>
+            </Box>
           </Toolbar>
         </AppBar>
 
@@ -119,53 +132,41 @@ function AppContent() {
           variant="permanent"
           sx={{
             width: drawerWidth,
-            [`& .MuiDrawer-paper`]: { width: drawerWidth, borderRight: "none" },
+            [`& .MuiDrawer-paper`]: { width: drawerWidth },
           }}
         >
           <Toolbar />
-          <List sx={{ px: 1, mt: 2 }}>
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <ListItem
-                  key={item.text}
-                  onClick={() => navigate(item.path)}
-                  sx={{
-                    cursor: "pointer",
-                    bgcolor: isActive ? "action.selected" : "transparent",
-                    color: isActive ? "primary.main" : "inherit",
-                    mb: 1,
-                    borderRadius: 2,
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{ color: isActive ? "primary.main" : "inherit" }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Typography
-                        variant="body1"
-                        sx={{ fontWeight: isActive ? "bold" : "medium" }}
-                      >
-                        {item.text}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              );
-            })}
+          <List sx={{ p: 2 }}>
+            {[
+              { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
+              { text: "Audits", icon: <Assessment />, path: "/audits" },
+              { text: "Risks", icon: <Warning />, path: "/risks" },
+            ].map((item) => (
+              <ListItem
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                sx={{
+                  borderRadius: 2,
+                  mb: 1,
+                  cursor: "pointer",
+                  bgcolor:
+                    location.pathname === item.path
+                      ? "action.selected"
+                      : "transparent",
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
           </List>
         </Drawer>
 
-        <Box component="main" sx={{ flexGrow: 1, p: 4 }}>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Toolbar />
           <Container maxWidth="lg">
-            {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
-                <CircularProgress />
-              </Box>
+            {loading && audits.length === 0 ? (
+              <CircularProgress sx={{ display: "block", mx: "auto", mt: 5 }} />
             ) : error ? (
               <Alert severity="error">{error}</Alert>
             ) : (
@@ -174,42 +175,52 @@ function AppContent() {
                   path="/"
                   element={
                     <DashboardPage
-                      key={`dash-${mode}`}
                       audits={audits}
-                      isMounted={true}
+                      onRowClick={setSelectedAudit}
+                      onEditClick={handleOpenEdit}
+                      isMounted={!loading}
                       mode={mode}
                       theme={theme}
-                      onRowClick={setSelectedAudit}
                     />
                   }
                 />
                 <Route
                   path="/audits"
                   element={
-                    <AuditsPage audits={audits} onRowClick={setSelectedAudit} />
+                    <AuditsPage
+                      audits={audits}
+                      onRowClick={setSelectedAudit}
+                      onEditClick={handleOpenEdit}
+                    />
                   }
                 />
                 <Route
                   path="/risks"
                   element={
                     <RisksPage
-                      key={`risks-${mode}`}
                       audits={audits}
-                      isMounted={true}
+                      isMounted={!loading}
                       mode={mode}
                     />
                   }
                 />
               </Routes>
             )}
-
-            <AuditDetailsDialog
-              open={Boolean(selectedAudit)}
-              onClose={() => setSelectedAudit(null)}
-              selectedAudit={selectedAudit}
-            />
           </Container>
         </Box>
+
+        <AuditFormDialog
+          key={auditToEdit ? `edit-${auditToEdit.id}` : `create-${formKey}`}
+          open={isFormOpen}
+          onClose={handleCloseForm}
+          editData={auditToEdit}
+        />
+
+        <AuditDetailsDialog
+          open={Boolean(selectedAudit)}
+          onClose={() => setSelectedAudit(null)}
+          selectedAudit={selectedAudit}
+        />
       </Box>
     </ThemeProvider>
   );
@@ -217,9 +228,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <Router>
-      {" "}
-      <AppContent />{" "}
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppContent />
     </Router>
   );
 }

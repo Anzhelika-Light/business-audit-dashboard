@@ -1,49 +1,109 @@
-import { Paper, Typography, Box } from "@mui/material";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import React, { useState, useEffect } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Box, useTheme, Typography } from "@mui/material";
+import type { Theme } from "@mui/material";
 
 interface AuditChartProps {
   isMounted: boolean;
-  chartData: any[];
-  mode: 'light' | 'dark';
-  theme: any;
+  chartData: { name: string; value: number }[];
+  mode: "light" | "dark";
+  theme: Theme;
 }
 
-export const AuditChart = ({ isMounted, chartData, mode, theme }: AuditChartProps) => {
+export const AuditChart: React.FC<AuditChartProps> = ({
+  isMounted,
+  chartData,
+}) => {
+  const theme = useTheme();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const dataWithColors = chartData.map((item, index) => ({
+    ...item,
+
+    fill:
+      index % 2 === 0
+        ? theme.palette.primary.main
+        : theme.palette.primary.light,
+  }));
+
   return (
-    <Paper sx={{ p: 3, mb: 5, borderRadius: 3, minHeight: 400, display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" sx={{ mb: 3, fontWeight: "medium" }}>Budget Distribution</Typography>
-      <Box sx={{ width: "100%", minWidth: 0 }}>
-        {isMounted && chartData.length > 0 ? (
-          <ResponsiveContainer width="99%" aspect={2} debounce={1}>
-            <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={mode === 'dark' ? "#444" : "#eee"} />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fontSize: 10, fill: mode === 'dark' ? '#aaa' : '#666' }} 
-                interval={0} 
-                angle={-15} 
-                textAnchor="end" 
-              />
-              <YAxis 
-                tickFormatter={(v) => `$${v}`} 
-                tick={{ fontSize: 12, fill: mode === 'dark' ? '#aaa' : '#666' }} 
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: theme.palette.background.paper, 
-                  borderRadius: "10px", 
-                  border: "none" 
-                }} 
-              />
-              <Bar dataKey="budget" fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} barSize={50} />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Typography color="textSecondary">Initializing chart area...</Typography>
-          </Box>
-        )}
-      </Box>
-    </Paper>
+    <Box
+      sx={{
+        width: "100%",
+        height: 350,
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: "bold" }}>
+        Budget Allocation by Audit
+      </Typography>
+
+      {isMounted && ready && dataWithColors.length > 0 ? (
+        <ResponsiveContainer width="99%" height={300}>
+          <BarChart
+            data={dataWithColors}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke={theme.palette.divider}
+            />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: theme.palette.text.secondary, fontSize: 12 }}
+            />
+            <Tooltip
+              cursor={{ fill: theme.palette.action.hover }}
+              contentStyle={{
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "8px",
+              }}
+            />
+
+            <Bar
+              dataKey="value"
+              radius={[4, 4, 0, 0]}
+              barSize={40}
+              fill="currentColor"
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography color="text.secondary">Loading chart...</Typography>
+        </Box>
+      )}
+    </Box>
   );
 };

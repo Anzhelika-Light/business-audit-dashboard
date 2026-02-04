@@ -1,9 +1,52 @@
 {
-    "audits": [
-      { "id": "1", "name": "Financial Audit Q4", "status": "Completed", "risk": "Low", "budget": "$12,000", "details": "Review Q4 2025." },
-      { "id": "2", "name": "IT Security Check", "status": "In Progress", "risk": "High", "budget": "$8,500", "details": "Critical vulnerabilities." },
-      { "id": "3", "name": "Tax Compliance", "status": "Pending", "risk": "Medium", "budget": "$5,000", "details": "Awaiting documents." },
-      { "id": "4", "name": "GDPR Data Audit", "status": "Completed", "risk": "Low", "budget": "$3,200", "details": "Compliance verified." },
-      { "id": "5", "name": "Supply Chain Review", "status": "In Progress", "risk": "High", "budget": "$15,400", "details": "Vendor reliability check." }
-    ]
-  }
+  "audits": [
+    {
+      "name": "Financial Audit Q4",
+      "risk": "Low",
+      "status": "In Progress",
+      "budget": "$13,000",
+      "details": "Review Q4 2025.",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "name": "IT Security Check",
+      "status": "In Progress",
+      "risk": "High",
+      "budget": "$8,500",
+      "details": "Critical vulnerabilities."
+    },
+    {
+      "id": "3",
+      "name": "Tax Compliance",
+      "status": "Pending",
+      "risk": "Medium",
+      "budget": "$5,000",
+      "details": "Awaiting documents."
+    },
+    {
+      "id": "4",
+      "name": "GDPR Data Audit",
+      "status": "Completed",
+      "risk": "Low",
+      "budget": "$3,200",
+      "details": "Compliance verified."
+    },
+    {
+      "id": "5",
+      "name": "Supply Chain Review",
+      "status": "Pending",
+      "risk": "High",
+      "budget": "$15,400",
+      "details": "Vendor reliability check."
+    },
+    {
+      "name": "Financial Audit Q1",
+      "risk": "Medium",
+      "status": "In Progress",
+      "budget": "$11000",
+      "details": "Financial Audit Q1 2026.",
+      "id": "da91"
+    }
+  ]
+}
