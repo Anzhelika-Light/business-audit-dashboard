@@ -50,7 +50,7 @@ export const AuditFormDialog: React.FC<AuditFormDialogProps> = ({
           ...formData,
           budget: formattedBudget,
           id: editData.id,
-        } as Audit)
+        } as Audit),
       );
     } else {
       await dispatch(addAudit({ ...formData, budget: formattedBudget }));
@@ -59,7 +59,13 @@ export const AuditFormDialog: React.FC<AuditFormDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      disableRestoreFocus
+    >
       <DialogTitle sx={{ fontWeight: "bold" }}>
         {editData ? "Edit Engagement" : "Initialize New Audit"}
       </DialogTitle>

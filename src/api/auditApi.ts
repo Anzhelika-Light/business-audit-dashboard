@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { Audit } from "../types/audit";
 
-const API_URL = "http://localhost:3001/audits";
+// const API_URL = "http://localhost:3001/audits";
+const API_URL = "https://69cbcb400b417a19e07b4178.mockapi.io/api/v1/audits";
 
 export const auditApi = {
   getAudits: async () => {
